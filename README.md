@@ -4,7 +4,7 @@ Description: This is one of the required projects to earn your certification. Fo
 
 number_guess.sh - Script for a number guessing game that runs in the terminal and saves user information
 
-* All tasks solved in this script
+* All tasks below were solved in this script
 
   Create a number_guessing_game folder in the project folder for your program
   
