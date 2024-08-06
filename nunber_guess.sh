@@ -1,7 +1,5 @@
-
 #!/bin/bash
 PSQL="psql --username=freecodecamp --dbname=number_guess -t --no-align -c"
-
 
 ASK_USER() {
 echo "Enter your username:"
@@ -51,6 +49,10 @@ GUESS_GAME() {
 PLAY_AGAIN() {
   if [[ $ANSWER == "yes" ]]; then
     GUESS_GAME
+
+  INSERTED_GAME=$($PSQL "INSERT INTO games(guesses,u_id) VALUES ('$GUESS', $USER_ID)")  
+  echo "You guessed it in $NUMBER_OF_GUESSES tries. The secret number was $SECRET_NUMBER. Nice job!"
+  
   elif [[ $ANSWER == "not" ]]; then
     echo -e "\nThank's for visiting us"
   else
@@ -60,14 +62,15 @@ PLAY_AGAIN() {
 }
 
 #Check if USERNAME exists
-USER_ID=$($PSQL "SELECT user_id FROM users WHERE username='$USERNAME'")
+USER_ID=$($PSQL "SELECT u_id FROM users WHERE name='$USERNAME'")
 
 #If not empty
 if [[ -n $USER_ID ]]
 then
-  G_PLAYED=$($PSQL "SELECT COUNT(best_game) FROM users WHERE username='$USERNAME'")
-  
-  BEST_GAMES=$($PSQL "SELECT MIN(best_game) FROM users WHERE username='$USERNAME'")
+
+  G_PLAYED=$($PSQL "SELECT COUNT(*) FROM users u JOIN games g ON u.u_id=g.u_id WHERE u.name='$USERNAME'")
+
+  BEST_GAMES=$($PSQL "SELECT MIN(g.guesses) AS min_guesses FROM users u JOIN games g ON u.u_id=g.u_id WHERE u.name='$USERNAME'")
   
   echo -e "\nWelcome back, $USERNAME! You have played $G_PLAYED games, and your best game took $BEST_GAMES guesses."
 
@@ -83,8 +86,12 @@ else
   GUESS_GAME
 
   #Insert results
-  INSERTED_GAME=$($PSQL "INSERT INTO users(username,best_game) VALUES ('$USERNAME', $NUMBER_OF_GUESSES)")
+  INSERTED_NAME=$($PSQL "INSERT INTO users(name) VALUES('$USERNAME')")
+
+  i_d=$($PSQL "SELECT U_id FROM users WHERE name='Joao' ORDER BY u_id DESC LIMIT 1")
+
+  INSERTED_GAME=$($PSQL "INSERT INTO games(guesses,u_id) VALUES ('$GUESS', $i_d)")
+
   #Print results of the game
   echo "You guessed it in $NUMBER_OF_GUESSES tries. The secret number was $SECRET_NUMBER. Nice job!"
 fi
-
